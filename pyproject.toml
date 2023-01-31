@@ -1,6 +1,3 @@
-[tool]
-[tool.pdm]
-
 [project]
 name = "neutron-sync"
 dynamic = ["version"]

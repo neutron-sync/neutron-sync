@@ -11,7 +11,7 @@ import typer
 from git import Repo
 from rich import print as rprint
 
-app = typer.Typer()
+app = typer.Typer(pretty_exceptions_enable=False)
 
 CONFIG_FILE_PATH = Path(os.environ['HOME']) / '.local' / 'nsync' / 'config.json'
 CONFIG_OPTION = typer.Option(
@@ -90,6 +90,13 @@ def translate_to_repo(repo, local_trans, path):
 			return new_path, new_rel
 
 
+def translate_to_fs(repo_rel, repo_trans):
+	for base, trans in repo_trans.items():
+		if repo_rel.startswith(base):
+			new_path = repo_rel.replace(base + os.path.sep, "", 1)
+			return Path(trans) / new_path
+
+
 def vprint(message, verbose, rich=True):
 	if verbose:
 		if rich:
@@ -134,6 +141,48 @@ def update_links(repo, to_path):
 	links.append(str(rel_path))
 	with open(lf, 'w') as fh:
 			json.dump(links, fh, indent=2)
+
+
+def relink(repo, repo_trans, verbose=False, yes=False):
+	with open(link_data_file(repo), 'r') as fh:
+		links = json.load(fh)
+		for link in links:
+			src_path = Path(repo) / link
+			dst_path = translate_to_fs(link, repo_trans)
+
+			recreate = False
+			remove = False
+			if dst_path.exists():
+				if dst_path.is_symlink():
+					if not os.readlink(str(dst_path)) == str(src_path):
+						remove = True
+						recreate = True
+
+				else:
+					remove = True
+					recreate = True
+
+			else:
+				recreate = True
+
+			if remove:
+				do_remove = False
+				if yes:
+					do_remove = True
+
+				else:
+					do_remove = typer.confirm(f"Remove {dst_path} before relinking?")
+
+				if do_remove:
+					dst_path.unlink()
+
+				else:
+					vprint(f"[red]Skipped Link:[/red] {dst_path} -> {src_path}", True)
+					continue
+
+			if recreate:
+				vprint(f"[green]Recreate Link:[/green] {dst_path} -> {src_path}", True)
+				os.symlink(src_path, dst_path)
 
 
 @app.command()
@@ -190,6 +239,8 @@ def link(
 @app.command()
 def pull(
 		config_file: Path = CONFIG_OPTION,
+		verbose: bool = VERBOSE_OPTION,
+		yes: bool = YES_OPTION,
 	):
 	"""
 	Pull files from remote and re-link
@@ -197,7 +248,7 @@ def pull(
 
 	repo, repo_trans, local_trans = load_config(config_file)
 	git_command(repo, "pull", verbose=True)
-	# todo: relink
+	relink(repo, repo_trans, verbose, yes)
 
 
 @app.command()
