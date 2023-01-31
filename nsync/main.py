@@ -82,6 +82,10 @@ def translate_to_repo(repo, local_trans, path):
 
 			new_path = str(path).replace(base, trans_full, 1)
 			new_rel = os.path.join(trans, path.relative_to(base))
+			parent = Path(new_path).parent
+			if not parent.exists():
+				parent.mkdir(parents=True)
+
 			return new_path, new_rel
 
 @app.command()
