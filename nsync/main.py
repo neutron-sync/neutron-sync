@@ -28,6 +28,7 @@ CONFIG_OPTION = typer.Option(
 VERBOSE_OPTION =  typer.Option(False, "-v", help="verbose")
 YES_OPTION = typer.Option(False, "-y", help="skip confirmation prompts")
 
+
 @app.command()
 def init(
 		repo: Path = typer.Argument(
@@ -307,7 +308,7 @@ def remove(
 		yes: bool = YES_OPTION,
 	):
 	"""
-	Commit existing tracked files and push to remote
+	Remove a file locally and remotely
 	"""
 	repo, repo_trans, local_trans = load_config(config_file)
 	now = datetime.datetime.now(tz=datetime.timezone.utc)
