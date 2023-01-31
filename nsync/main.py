@@ -105,6 +105,20 @@ def vprint(message, verbose, rich=True):
 			print(message)
 
 
+def confirm_apply(func, yes, question, *args, **kwargs):
+	do_apply = False
+	if yes:
+		do_apply = True
+
+	else:
+		do_apply = typer.confirm(question)
+
+	if do_apply:
+		func(*args, **kwargs)
+
+	return do_apply
+
+
 def git_command(repo, command, *args, verbose=False):
 	repo = Repo(repo)
 	message = f"[green]Command: git {command}"
@@ -166,15 +180,8 @@ def relink(repo, repo_trans, verbose=False, yes=False):
 				recreate = True
 
 			if remove:
-				do_remove = False
-				if yes:
-					do_remove = True
-
-				else:
-					do_remove = typer.confirm(f"Remove {dst_path} before relinking?")
-
-				if do_remove:
-					dst_path.unlink()
+				if confirm_apply(dst_path.unlink, yes, f"Remove {dst_path} before relinking?"):
+					pass
 
 				else:
 					vprint(f"[red]Skipped Link:[/red] {dst_path} -> {src_path}", True)
@@ -226,14 +233,7 @@ def link(
 	message = f"nsync links updated @ {now.isoformat()}"
 	git_command(repo, "commit", "-m", message, str(link_data_file(repo, rel=True)), verbose=verbose)
 
-	if yes:
-		push = True
-
-	else:
-		push = typer.confirm("Push changes?")
-
-	if push:
-		git_command(repo, "push", verbose=verbose)
+	confirm_apply(git_command, yes, "Push changes?", repo, "push", verbose=verbose)
 
 
 @app.command()
