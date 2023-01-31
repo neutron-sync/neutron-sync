@@ -308,7 +308,7 @@ def remove(
 		yes: bool = YES_OPTION,
 	):
 	"""
-	Remove a file locally and remotely
+	Remove a file locally and in the repo
 	"""
 	repo, repo_trans, local_trans = load_config(config_file)
 	now = datetime.datetime.now(tz=datetime.timezone.utc)
@@ -324,6 +324,28 @@ def remove(
 			git_command(repo, "commit", "-m", message, str(src_rel), verbose=verbose)
 
 	confirm_apply(yes, "Push changes?", git_command, repo, "push", verbose=verbose)
+
+
+@app.command()
+def restore_local_only(
+		paths: List[Path] = typer.Argument(
+			None,
+			exists=True,
+			file_okay=True,
+			dir_okay=True,
+			writable=True,
+			readable=True,
+			resolve_path=False,
+		),
+		config_file: Path = CONFIG_OPTION,
+		verbose: bool = VERBOSE_OPTION,
+		yes: bool = YES_OPTION,
+	):
+	"""
+	Remove file from repo and put back to the local location
+	"""
+	repo, repo_trans, local_trans = load_config(config_file)
+	now = datetime.datetime.now(tz=datetime.timezone.utc)
 
 
 if __name__ == "__main__":
