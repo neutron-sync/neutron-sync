@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import datetime
 import json
 import os
 import shutil
@@ -7,6 +8,7 @@ from pathlib import Path
 from typing import List
 
 import typer
+from git import Repo
 
 app = typer.Typer()
 
@@ -21,6 +23,9 @@ CONFIG_OPTION = typer.Option(
 	resolve_path=True,
 	envvar="NSYNC_CONFIG",
 )
+
+VERBOSE_OPTION =  typer.Option(False, "-v", help="verbose")
+YES_OPTION = typer.Option(False, "-y", help="skip confirmation prompts")
 
 @app.command()
 def init(
@@ -71,12 +76,13 @@ def load_config(config_file):
 def translate_to_repo(repo, local_trans, path):
 	for base, trans in local_trans.items():
 		if str(path).startswith(base):
-			trans = repo + os.path.sep + trans
+			trans_full = repo + os.path.sep + trans
 			if base.endswith(os.path.sep):
-				trans += os.path.sep
+				trans_full += os.path.sep
 
-			new_path = str(path).replace(base, trans, 1)
-			return new_path
+			new_path = str(path).replace(base, trans_full, 1)
+			new_rel = os.path.join(trans, path.relative_to(base))
+			return new_path, new_rel
 
 @app.command()
 def link(
@@ -89,17 +95,43 @@ def link(
 			readable=True,
 			resolve_path=True,
 		),
-		config_file: Path = CONFIG_OPTION
+		config_file: Path = CONFIG_OPTION,
+		verbose: bool = VERBOSE_OPTION,
+		yes: bool = YES_OPTION,
 	):
 	repo, repo_trans, local_trans = load_config(config_file)
+	git_repo = Repo(str(repo))
+	now = datetime.datetime.now(tz=datetime.timezone.utc)
 
 	for from_path in paths:
-		to_path = translate_to_repo(repo, local_trans, from_path)
+		to_path, to_rel = translate_to_repo(repo, local_trans, from_path)
 
-		print(f"mv {from_path} {to_path}")
+		if verbose:
+			print(f"mv {from_path} {to_path}")
 		shutil.move(from_path, to_path)
-		print(f"ln -s {to_path} {from_path}")
+
+		if verbose:
+			print(f"ln -s {to_path} {from_path}")
 		os.symlink(to_path, from_path)
+
+		if verbose:
+			print(f"git add {to_rel}")
+		git_repo.git.add(to_rel)
+
+		message = f"nsync link @ {now.isoformat()}"
+		if verbose:
+			print(f'git commit -m"{message}" {to_rel}')
+		git_repo.git.commit("-m", message, to_rel)
+
+	if yes:
+		push = True
+
+	else:
+		push = typer.confirm("Push changes?")
+
+	if push:
+		git_repo.git.push()
+
 
 @app.command()
 def pull(config_file: Path = CONFIG_OPTION):

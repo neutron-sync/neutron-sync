@@ -17,6 +17,30 @@ requires_python = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7
 summary = "Cross-platform colored terminal text."
 
 [[package]]
+name = "gitdb"
+version = "4.0.10"
+requires_python = ">=3.7"
+summary = "Git Object Database"
+dependencies = [
+    "smmap<6,>=3.0.1",
+]
+
+[[package]]
+name = "gitpython"
+version = "3.1.30"
+requires_python = ">=3.7"
+summary = "GitPython is a python library used to interact with Git repositories"
+dependencies = [
+    "gitdb<5,>=4.0.1",
+]
+
+[[package]]
+name = "smmap"
+version = "5.0.0"
+requires_python = ">=3.6"
+summary = "A pure Python implementation of a sliding window memory map manager"
+
+[[package]]
 name = "typer"
 version = "0.7.0"
 requires_python = ">=3.6"
@@ -27,7 +51,7 @@ dependencies = [
 
 [metadata]
 lock_version = "4.1"
-content_hash = "sha256:9009524d9c63ffa2f4c203e4e7a43f3205c6dd74e41541dae7001fad91efbeb7"
+content_hash = "sha256:12b3e4a14f065227206538f0bc8a5de9267420e4d3ca623ea8120cfa72328269"
 
 [metadata.files]
 "click 8.1.3" = [
@@ -37,6 +61,18 @@ content_hash = "sha256:9009524d9c63ffa2f4c203e4e7a43f3205c6dd74e41541dae7001fad9
 "colorama 0.4.6" = [
     {url = "https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {url = "https://files.pythonhosted.org/packages/d8/53/6f443c9a4a8358a93a6792e2acffb9d9d5cb0a5cfd8802644b7b1c9a02e4/colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
+]
+"gitdb 4.0.10" = [
+    {url = "https://files.pythonhosted.org/packages/21/a6/35f83efec687615c711fe0a09b67e58f6d1254db27b1013119de46f450bd/gitdb-4.0.10-py3-none-any.whl", hash = "sha256:c286cf298426064079ed96a9e4a9d39e7f3e9bf15ba60701e95f5492f28415c7"},
+    {url = "https://files.pythonhosted.org/packages/4b/47/dc98f3d5d48aa815770e31490893b92c5f1cd6c6cf28dd3a8ae0efffac14/gitdb-4.0.10.tar.gz", hash = "sha256:6eb990b69df4e15bad899ea868dc46572c3f75339735663b81de79b06f17eb9a"},
+]
+"gitpython 3.1.30" = [
+    {url = "https://files.pythonhosted.org/packages/d0/7c/e6942be5f2c03a9de68a6c782373dcec7dc1d10664dd20652bfb7307f905/GitPython-3.1.30-py3-none-any.whl", hash = "sha256:cd455b0000615c60e286208ba540271af9fe531fa6a87cc590a7298785ab2882"},
+    {url = "https://files.pythonhosted.org/packages/ef/8d/50658d134d89e080bb33eb8e2f75d17563b5a9dfb75383ea1a78e1df6fff/GitPython-3.1.30.tar.gz", hash = "sha256:769c2d83e13f5d938b7688479da374c4e3d49f71549aaf462b646db9602ea6f8"},
+]
+"smmap 5.0.0" = [
+    {url = "https://files.pythonhosted.org/packages/21/2d/39c6c57032f786f1965022563eec60623bb3e1409ade6ad834ff703724f3/smmap-5.0.0.tar.gz", hash = "sha256:c840e62059cd3be204b0c9c9f74be2c09d5648eddd4580d9314c3ecde0b30936"},
+    {url = "https://files.pythonhosted.org/packages/6d/01/7caa71608bc29952ae09b0be63a539e50d2484bc37747797a66a60679856/smmap-5.0.0-py3-none-any.whl", hash = "sha256:2aba19d6a040e78d8b09de5c57e96207b09ed71d8e55ce0959eeee6c8e190d94"},
 ]
 "typer 0.7.0" = [
     {url = "https://files.pythonhosted.org/packages/0d/44/56c3f48d2bb83d76f5c970aef8e2c3ebd6a832f09e3621c5395371fe6999/typer-0.7.0-py3-none-any.whl", hash = "sha256:b5e704f4e48ec263de1c0b3a2387cd405a13767d2f907f44c1a08cbad96f606d"},
