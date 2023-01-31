@@ -90,9 +90,12 @@ def translate_to_repo(repo, local_trans, path):
 			return new_path, new_rel
 
 
-def vprint(message, verbose):
+def vprint(message, verbose, rich=True):
 	if verbose:
-		rprint(message)
+		if rich:
+			rprint(message)
+		else:
+			print(message)
 
 
 def git_command(repo, command, *args, verbose=False):
@@ -105,7 +108,8 @@ def git_command(repo, command, *args, verbose=False):
 
 	vprint(message, verbose)
 	out = getattr(repo.git, command)(*args)
-	vprint("[bold blue]Output:[/bold blue]\n" + out, verbose)
+	vprint("[bold blue]Output:[/bold blue]\n", verbose)
+	vprint(out, verbose, rich=False)
 
 
 def link_data_file(repo, rel=False):
