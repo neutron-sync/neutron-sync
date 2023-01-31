@@ -9,6 +9,7 @@ from typing import List
 
 import typer
 from git import Repo
+from rich import print as rprint
 
 app = typer.Typer()
 
@@ -88,6 +89,49 @@ def translate_to_repo(repo, local_trans, path):
 
 			return new_path, new_rel
 
+
+def vprint(message, verbose):
+	if verbose:
+		rprint(message)
+
+
+def git_command(repo, command, *args, verbose=False):
+	repo = Repo(repo)
+	message = f"[green]Command: git {command}"
+	if args:
+		message += " " + " ".join(args)
+
+	message += "[/green]"
+
+	vprint(message, verbose)
+	out = getattr(repo.git, command)(*args)
+	vprint("[bold blue]Output:[/bold blue]\n" + out, verbose)
+
+
+def link_data_file(repo, rel=False):
+	filename = 'nsync-links.json'
+
+	if rel:
+		return Path(filename)
+
+	return Path(repo) / filename
+
+
+def update_links(repo, to_path):
+	lf = link_data_file(repo)
+	repo = Path(repo)
+
+	links = []
+	rel_path = Path(to_path).relative_to(repo)
+	if lf.exists():
+		with open(lf, 'r') as fh:
+			links = json.load(fh)
+
+	links.append(str(rel_path))
+	with open(lf, 'w') as fh:
+			json.dump(links, fh, indent=2)
+
+
 @app.command()
 def link(
 	paths: List[Path] = typer.Argument(
@@ -103,29 +147,31 @@ def link(
 		verbose: bool = VERBOSE_OPTION,
 		yes: bool = YES_OPTION,
 	):
+	"""
+	Move a file to encrypted repo and link, commit, and push(optional)
+	"""
+
 	repo, repo_trans, local_trans = load_config(config_file)
-	git_repo = Repo(str(repo))
 	now = datetime.datetime.now(tz=datetime.timezone.utc)
 
 	for from_path in paths:
 		to_path, to_rel = translate_to_repo(repo, local_trans, from_path)
 
-		if verbose:
-			print(f"mv {from_path} {to_path}")
+		vprint(f"mv {from_path} {to_path}", verbose)
 		shutil.move(from_path, to_path)
 
-		if verbose:
-			print(f"ln -s {to_path} {from_path}")
+		vprint(f"ln -s {to_path} {from_path}", verbose)
 		os.symlink(to_path, from_path)
+		update_links(repo, to_path)
 
-		if verbose:
-			print(f"git add {to_rel}")
-		git_repo.git.add(to_rel)
+		git_command(repo, "add", to_rel, verbose=verbose)
 
 		message = f"nsync link @ {now.isoformat()}"
-		if verbose:
-			print(f'git commit -m"{message}" {to_rel}')
-		git_repo.git.commit("-m", message, to_rel)
+		git_command(repo, "commit", "-m", message, to_rel, verbose=verbose)
+
+	git_command(repo, "add", str(link_data_file(repo, rel=True)), verbose=verbose)
+	message = f"nsync links updated @ {now.isoformat()}"
+	git_command(repo, "commit", "-m", message, str(link_data_file(repo, rel=True)), verbose=verbose)
 
 	if yes:
 		push = True
@@ -134,12 +180,59 @@ def link(
 		push = typer.confirm("Push changes?")
 
 	if push:
-		git_repo.git.push()
+		git_command(repo, "push", verbose=verbose)
 
 
 @app.command()
-def pull(config_file: Path = CONFIG_OPTION):
-	pass
+def pull(
+		config_file: Path = CONFIG_OPTION,
+	):
+	"""
+	Pull files from remote and re-link
+	"""
+
+	repo, repo_trans, local_trans = load_config(config_file)
+	git_command(repo, "pull", verbose=True)
+	# todo: relink
+
+
+@app.command()
+def push(
+		config_file: Path = CONFIG_OPTION,
+	):
+	"""
+	Push files to remote
+	"""
+
+	repo, repo_trans, local_trans = load_config(config_file)
+	git_command(repo, "push", verbose=True)
+
+
+@app.command()
+def status(
+		config_file: Path = CONFIG_OPTION,
+		verbose: bool = VERBOSE_OPTION,
+	):
+	"""
+	Get repo status
+	"""
+	repo, repo_trans, local_trans = load_config(config_file)
+	git_command(repo, "status", verbose=True)
+
+
+@app.command()
+def save(
+		config_file: Path = CONFIG_OPTION,
+		verbose: bool = VERBOSE_OPTION,
+	):
+	"""
+	Commit existing tracked files and push to remote
+	"""
+	repo, repo_trans, local_trans = load_config(config_file)
+	now = datetime.datetime.now(tz=datetime.timezone.utc)
+	message = f"nsync save @ {now.isoformat()}"
+	git_command(repo, "commit", "-a", "-m", message, verbose=verbose)
+	git_command(repo, "push", verbose=verbose)
 
 if __name__ == "__main__":
 	app()

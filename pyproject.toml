@@ -9,8 +9,8 @@ authors = [
     {name = "Paul Bailey", email = "paul@neutron.studio"},
 ]
 dependencies = [
-    "typer>=0.7.0",
     "GitPython>=3.1.30",
+    "typer[all]>=0.7.0",
 ]
 requires-python = ">=3.8"
 readme = "README.md"
