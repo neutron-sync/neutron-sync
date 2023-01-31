@@ -105,7 +105,7 @@ def vprint(message, verbose, rich=True):
 			print(message)
 
 
-def confirm_apply(func, yes, question, *args, **kwargs):
+def confirm_apply(yes, question, func, *args, **kwargs):
 	do_apply = False
 	if yes:
 		do_apply = True
@@ -114,7 +114,8 @@ def confirm_apply(func, yes, question, *args, **kwargs):
 		do_apply = typer.confirm(question)
 
 	if do_apply:
-		func(*args, **kwargs)
+		if func:
+			func(*args, **kwargs)
 
 	return do_apply
 
@@ -180,7 +181,7 @@ def relink(repo, repo_trans, verbose=False, yes=False):
 				recreate = True
 
 			if remove:
-				if confirm_apply(dst_path.unlink, yes, f"Remove {dst_path} before relinking?"):
+				if confirm_apply(yes, f"Remove {dst_path} before relinking?", dst_path.unlink):
 					pass
 
 				else:
@@ -194,7 +195,7 @@ def relink(repo, repo_trans, verbose=False, yes=False):
 
 @app.command()
 def link(
-	paths: List[Path] = typer.Argument(
+		paths: List[Path] = typer.Argument(
 			None,
 			exists=True,
 			file_okay=True,
@@ -233,7 +234,7 @@ def link(
 	message = f"nsync links updated @ {now.isoformat()}"
 	git_command(repo, "commit", "-m", message, str(link_data_file(repo, rel=True)), verbose=verbose)
 
-	confirm_apply(git_command, yes, "Push changes?", repo, "push", verbose=verbose)
+	confirm_apply(yes, "Push changes?", git_command, repo, "push", verbose=verbose)
 
 
 @app.command()
@@ -288,6 +289,41 @@ def save(
 	message = f"nsync save @ {now.isoformat()}"
 	git_command(repo, "commit", "-a", "-m", message, verbose=verbose)
 	git_command(repo, "push", verbose=verbose)
+
+
+@app.command()
+def remove(
+		paths: List[Path] = typer.Argument(
+			None,
+			exists=True,
+			file_okay=True,
+			dir_okay=True,
+			writable=True,
+			readable=True,
+			resolve_path=False,
+		),
+		config_file: Path = CONFIG_OPTION,
+		verbose: bool = VERBOSE_OPTION,
+		yes: bool = YES_OPTION,
+	):
+	"""
+	Commit existing tracked files and push to remote
+	"""
+	repo, repo_trans, local_trans = load_config(config_file)
+	now = datetime.datetime.now(tz=datetime.timezone.utc)
+
+	for dst_path in paths:
+		src_path, src_rel = translate_to_repo(repo, local_trans, dst_path)
+
+		if confirm_apply(yes, f"Remove and unlink {dst_path}?", None):
+			vprint(f"rm {dst_path}", verbose)
+			dst_path.unlink()
+			git_command(repo, "rm", "-f", str(src_rel), verbose=verbose)
+			message = f"nsync remove @ {now.isoformat()}"
+			git_command(repo, "commit", "-m", message, str(src_rel), verbose=verbose)
+
+	confirm_apply(yes, "Push changes?", git_command, repo, "push", verbose=verbose)
+
 
 if __name__ == "__main__":
 	app()
