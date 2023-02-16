@@ -4,6 +4,7 @@ import datetime
 import json
 import os
 import shutil
+import sys
 from pathlib import Path
 from typing import List
 
@@ -51,6 +52,10 @@ def init(
 			envvar="NSYNC_CONFIG",
 		)
 	):
+		if repo is None:
+			print('repo argument is required')
+			sys.exit(1)
+
 		if not config_file.parent.exists():
 			config_file.parent.mkdir(parents=True)
 
@@ -144,6 +149,15 @@ def link_data_file(repo, rel=False):
 	return Path(repo) / filename
 
 
+def perms_data_file(repo, rel=False):
+	filename = 'nsync-perms.json'
+
+	if rel:
+		return Path(filename)
+
+	return Path(repo) / filename
+
+
 def update_links(repo, to_path):
 	lf = link_data_file(repo)
 	repo = Path(repo)
@@ -157,6 +171,14 @@ def update_links(repo, to_path):
 	links.append(str(rel_path))
 	with open(lf, 'w') as fh:
 			json.dump(links, fh, indent=2)
+
+
+def remove_path(path):
+	if path.is_dir():
+		shutil.rmtree(path)
+
+	else:
+		path.unlink()
 
 
 def relink(repo, repo_trans, verbose=False, yes=False):
@@ -182,7 +204,7 @@ def relink(repo, repo_trans, verbose=False, yes=False):
 				recreate = True
 
 			if remove:
-				if confirm_apply(yes, f"Remove {dst_path} before relinking?", dst_path.unlink):
+				if confirm_apply(yes, f"Remove {dst_path} before relinking?", remove_path, dst_path):
 					pass
 
 				else:
@@ -191,6 +213,9 @@ def relink(repo, repo_trans, verbose=False, yes=False):
 
 			if recreate:
 				vprint(f"[green]Recreate Link:[/green] {dst_path} -> {src_path}", True)
+				if not dst_path.parent.exists():
+					dst_path.parent.mkdir(parents=True)
+
 				os.symlink(src_path, dst_path)
 
 
@@ -235,6 +260,10 @@ def link(
 	message = f"nsync links updated @ {now.isoformat()}"
 	git_command(repo, "commit", "-m", message, str(link_data_file(repo, rel=True)), verbose=verbose)
 
+	save_permissions(repo)
+	message = f"nsync perms updated @ {now.isoformat()}"
+	git_command(repo, "commit", "-m", message, str(perms_data_file(repo, rel=True)), verbose=verbose)
+
 	confirm_apply(yes, "Push changes?", git_command, repo, "push", verbose=verbose)
 
 
@@ -251,6 +280,7 @@ def pull(
 	repo, repo_trans, local_trans = load_config(config_file)
 	git_command(repo, "pull", verbose=True)
 	relink(repo, repo_trans, verbose, yes)
+	apply_perms(config_file, verbose)
 
 
 @app.command()
@@ -346,6 +376,56 @@ def restore_local_only(
 	"""
 	repo, repo_trans, local_trans = load_config(config_file)
 	now = datetime.datetime.now(tz=datetime.timezone.utc)
+
+
+def get_permissions(data, base, link):
+	src_path = base / link
+
+	data[link] = {'mode': src_path.stat().st_mode}
+	if src_path.is_dir():
+		data[link]['contents'] = {}
+		for p in src_path.iterdir():
+			get_permissions(data[link]['contents'], p.parent, p.name)
+
+
+def save_permissions(repo):
+	"""
+	Get file permissions and save in data file
+	"""
+
+	with open(link_data_file(repo), 'r') as fh:
+		links = json.load(fh)
+
+		data = {}
+		for link in links:
+			get_permissions(data, Path(repo), link)
+
+	with open(perms_data_file(repo), 'w') as fh:
+		json.dump(data, fh, indent=2)
+
+
+def apply_permissions(data, base, repo_path, verbose):
+	for p, stats in data.items():
+		path = base / p
+		relpath = str(path).replace(repo_path, '')
+		vprint(f"Setting {relpath} {oct(stats['mode'])}", verbose, rich=False)
+		path.chmod(stats['mode'])
+		if 'contents' in stats:
+			apply_permissions(stats['contents'], path, repo_path, verbose)
+
+
+@app.command()
+def apply_perms(
+		config_file: Path = CONFIG_OPTION,
+		verbose: bool = VERBOSE_OPTION,
+	):
+		repo, repo_trans, local_trans = load_config(config_file)
+
+		with open(perms_data_file(repo), 'r') as fh:
+			data = json.load(fh)
+
+		apply_permissions(data, Path(repo), str(Path(repo)) + '/', verbose)
+
 
 
 if __name__ == "__main__":
