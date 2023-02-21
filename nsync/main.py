@@ -427,6 +427,14 @@ def apply_perms(
 		apply_permissions(data, Path(repo), str(Path(repo)) + '/', verbose)
 
 
+@app.command()
+def transfer(
+		config_file: Path = CONFIG_OPTION,
+		verbose: bool = VERBOSE_OPTION,
+	):
+		pass
+
+
 
 if __name__ == "__main__":
 	app()
