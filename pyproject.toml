@@ -8,6 +8,9 @@ authors = [
 dependencies = [
     "GitPython>=3.1.30",
     "typer[all]>=0.7.0",
+    "blacksheep>=1.2.10",
+    "uvicorn>=0.20.0",
+    "setuptools>=67.4.0",
 ]
 requires-python = ">=3.8"
 readme = "README.md"

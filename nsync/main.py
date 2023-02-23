@@ -11,6 +11,8 @@ from typing import List
 import typer
 from git import Repo
 from rich import print as rprint
+import uvicorn
+
 
 app = typer.Typer(pretty_exceptions_enable=False)
 
@@ -433,6 +435,14 @@ def transfer(
 		verbose: bool = VERBOSE_OPTION,
 	):
 		pass
+
+
+@app.command()
+def server():
+	mydir = Path(__file__).parent
+	config = uvicorn.Config('nsync.server:app', port=8000, log_level="info", reload=True, reload_dirs=[mydir])
+	server = uvicorn.Server(config)
+	server.run()
 
 
 
