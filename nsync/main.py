@@ -9,9 +9,11 @@ from pathlib import Path
 from typing import List
 
 import typer
+import uvicorn
+
+from cryptography.fernet import Fernet
 from git import Repo
 from rich import print as rprint
-import uvicorn
 
 
 app = typer.Typer(pretty_exceptions_enable=False)
@@ -431,10 +433,32 @@ def apply_perms(
 
 @app.command()
 def transfer(
+		key_file: Path = typer.Argument(
+			Path(os.environ['HOME']) / '.dotfiles.key',
+			exists=True,
+			file_okay=True,
+			dir_okay=False,
+			writable=False,
+			readable=True,
+			resolve_path=False,
+		),
+		file: List[Path] = typer.Option(
+			[Path(os.environ['HOME']) / '.ssh' / 'id_rsa'],
+			exists=True,
+			file_okay=True,
+			dir_okay=False,
+			writable=False,
+			readable=True,
+			resolve_path=False,
+		),
+		server_url: str = typer.Option('https://www.neutronsync.com/'),
 		config_file: Path = CONFIG_OPTION,
 		verbose: bool = VERBOSE_OPTION,
 	):
-		pass
+		print(key_file)
+		print(file)
+		print(server_url)
+		print(config_file)
 
 
 @app.command()
