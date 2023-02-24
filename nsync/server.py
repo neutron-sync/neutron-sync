@@ -1,11 +1,17 @@
+import datetime
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
 from blacksheep import Application, Response, Request, Content
 
+import redis.asyncio as redis
+from haikunator import Haikunator
+
 
 app = Application()
+RCLIENT = redis.Redis.from_url(os.environ.get('REDIS_URL', 'redis://localhost:6379/0'))
 
 homepage = Path(__file__).parent / 'home.html'
 with homepage.open('rb') as fh:
@@ -19,7 +25,6 @@ async def home():
 
 @app.router.post("/")
 async def transfer(request: Request):
-  files = await request.files()
   data = await request.form()
 
   status_code = 200
@@ -29,7 +34,33 @@ async def transfer(request: Request):
   }
 
   if data['action'] == 'store':
-    pass
+    haikunator = Haikunator()
+    key = haikunator.haikunate()
+
+    secs = 15 * 60
+    await RCLIENT.setex(key, secs, data.get("file", "").encode())
+    expiration = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=secs)
+
+    ret['key'] = key
+    ret['status'] = 'stored'
+    ret['expiration'] = expiration.isoformat()
+
+  elif data['action'] == 'get':
+    key = data.get('key')
+    if key:
+      value = await RCLIENT.get(key)
+      if value:
+        ret['status'] = 'available'
+        ret['file'] = value.decode()
+        await RCLIENT.delete(key)
+
+      else:
+        ret['status'] = 'expired key'
+        status_code = 400
+
+    else:
+      ret['status'] = 'key required'
+      status_code = 400
 
   else:
     ret['status'] = 'Unknown Action'

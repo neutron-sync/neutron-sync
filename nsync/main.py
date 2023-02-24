@@ -439,8 +439,7 @@ def transfer(
 
 @app.command()
 def server():
-	mydir = Path(__file__).parent
-	config = uvicorn.Config('nsync.server:app', port=8000, log_level="info", reload=True, reload_dirs=[mydir])
+	config = uvicorn.Config('nsync.server:app', port=8000, log_level="info", reload=True)
 	server = uvicorn.Server(config)
 	server.run()
 
