@@ -138,10 +138,10 @@ def git_command(repo, command, *args, verbose=False):
 
 	message += "[/green]"
 
-	vprint(message, verbose)
+	rprint(message)
 	out = getattr(repo.git, command)(*args)
-	vprint("[bold blue]Output:[/bold blue]\n", verbose)
-	vprint(out, verbose, rich=False)
+	rprint("[bold blue]Output:[/bold blue]\n")
+	print(out)
 
 
 def link_data_file(repo, rel=False):
