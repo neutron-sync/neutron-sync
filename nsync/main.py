@@ -57,6 +57,9 @@ def init(
 			envvar="NSYNC_CONFIG",
 		)
 	):
+		"""
+		Create an nsync configuration file
+		"""
 		if repo is None:
 			print('repo argument is required')
 			sys.exit(1)
@@ -424,6 +427,9 @@ def apply_perms(
 		config_file: Path = CONFIG_OPTION,
 		verbose: bool = VERBOSE_OPTION,
 	):
+		"""
+		reapply file permissions from remote
+		"""
 		repo, repo_trans, local_trans = load_config(config_file)
 
 		with open(perms_data_file(repo), 'r') as fh:
@@ -460,7 +466,7 @@ def start_transfer(
 		yes: bool = YES_OPTION,
 	):
 		"""
-		Transfer small text files to another system
+		Transfer small text files to another machine
 		"""
 		client = ApiClient(server_url)
 		files = [key_file] + file
@@ -475,12 +481,18 @@ def complete_transfer(
 		encryption_password: str = typer.Option(None, prompt=True),
 		storage_key: str = typer.Option(None, prompt=True),
 	):
+		"""
+		Complete a transfer of files on another machine
+		"""
 	  client = ApiClient(server_url)
 	  client.download(encryption_password, storage_key)
 
 
 @app.command()
 def server():
+	"""
+	Run a transfer server
+	"""
 	config = uvicorn.Config('nsync.server:app', port=8000, log_level="info", reload=True)
 	server = uvicorn.Server(config)
 	server.run()
