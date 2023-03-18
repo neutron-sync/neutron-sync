@@ -1,17 +1,38 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Example.">
-</head>
-<body>
-  <h1>Welcome to Neutron Sync Server</h1>
-  <p>
-    To use this instance, make a POST request for the Transfer API.
-    <br><br>
-    See <a href="https://github.com/neutron-sync/neutron-sync">github.com/neutron-sync/neutron-sync</a>
-    for more documentation.
-  </p>
-</body>
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/quasar@2.11.8/dist/quasar.prod.css" rel="stylesheet" type="text/css">
+    <title>Neutron Sync Server</title>
+  </head>
+  <body>
+    <div id="q-app" class="q-pa-md row items-start q-gutter-md">
+      <q-card>
+        <q-car-section>
+          <h1 style="font-size: 2.0rem; font-weight: bold; margin: 0; padding: 0 20px;">Welcome to Neutron Sync Server</h1>
+        </q-car-section>
+        <q-separator inset></q-separator>
+        <q-card-section>
+          <p style="font-size: 1.2rem;">
+            To use this instance, make a POST request for the Transfer API.
+            <br><br>
+            See <a href="https://github.com/neutron-sync/neutron-sync">github.com/neutron-sync/neutron-sync</a>
+            for more documentation.
+          </p>
+        </q-card-section>
+      </q-card>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quasar@2.11.8/dist/quasar.umd.prod.js"></script>
+
+    <script>
+      const app = Vue.createApp({
+        setup () {
+          return {}
+        }
+      })
+      app.use(Quasar)
+      app.mount('#q-app')
+    </script>
+  </body>
 </html>
