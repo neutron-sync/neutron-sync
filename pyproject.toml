@@ -37,4 +37,4 @@ version = {from = "nsync/__init__.py"}
 [tool.pdm.scripts]
 _.env_file = ".env"
 ndev = "pdm run python nsync/main.py"
-publish = "pdm publish --username pizzapanther"
+publish = "pdm publish --username __token__ --password $PDM_PUBLISH_PASSWORD_NSYNC"
