@@ -14,6 +14,7 @@ dependencies = [
     "haikunator>=2.1.0",
     "redis[hiredis]>=4.5.1",
     "cryptography>=39.0.1",
+    "httpx>=0.23.3",
 ]
 requires-python = ">=3.8"
 readme = "README.md"

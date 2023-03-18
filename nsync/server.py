@@ -38,8 +38,10 @@ async def transfer(request: Request):
     key = haikunator.haikunate()
 
     secs = 15 * 60
-    await RCLIENT.setex(key, secs, data.get("file", "").encode())
+    await RCLIENT.setex(key, secs, data.get("file", ""))
     expiration = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=secs)
+
+    await RCLIENT.setex(key + '-salt', secs, data.get("salt", ""))
 
     ret['key'] = key
     ret['status'] = 'stored'
@@ -49,8 +51,10 @@ async def transfer(request: Request):
     key = data.get('key')
     if key:
       value = await RCLIENT.get(key)
-      if value:
+      salt = await RCLIENT.get(key + '-salt')
+      if value and salt:
         ret['status'] = 'available'
+        ret['salt'] = salt.decode()
         ret['file'] = value.decode()
         await RCLIENT.delete(key)
 
