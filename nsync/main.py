@@ -484,18 +484,20 @@ def complete_transfer(
 		"""
 		Complete a transfer of files on another machine
 		"""
-	  client = ApiClient(server_url)
-	  client.download(encryption_password, storage_key)
+		client = ApiClient(server_url)
+		client.download(encryption_password, storage_key)
 
 
 @app.command()
-def server():
-	"""
-	Run a transfer server
-	"""
-	config = uvicorn.Config('nsync.server:app', port=8000, log_level="info", reload=True)
-	server = uvicorn.Server(config)
-	server.run()
+def server(
+		port: int = typer.Argument(8000, envvar="PORT")
+	):
+		"""
+		Run a transfer server
+		"""
+		config = uvicorn.Config('nsync.server:app', port=port, log_level="info", reload=True)
+		server = uvicorn.Server(config)
+		server.run()
 
 
 
