@@ -490,12 +490,13 @@ def complete_transfer(
 
 @app.command()
 def server(
+		host: str = typer.Argument('127.0.0.1', envvar="HOST"),
 		port: int = typer.Argument(8000, envvar="PORT")
 	):
 		"""
 		Run a transfer server
 		"""
-		config = uvicorn.Config('nsync.server:app', port=port, log_level="info", reload=True)
+		config = uvicorn.Config('nsync.server:app', host=host, port=port, log_level="info", reload=True)
 		server = uvicorn.Server(config)
 		server.run()
 
