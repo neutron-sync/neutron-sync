@@ -8,6 +8,7 @@ ARG groupid
 RUN mkdir /opt/neutron-sync
 WORKDIR /opt/neutron-sync
 
+RUN install_packages git-crypt
 RUN pip3 install --upgrade pip && pip3 install --upgrade pdm
 
 COPY . /opt/neutron-sync
