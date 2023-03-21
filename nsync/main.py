@@ -14,6 +14,7 @@ import uvicorn
 from git import Repo
 from rich import print as rprint
 
+import nsync
 from nsync.client import ApiClient
 
 
@@ -33,6 +34,14 @@ CONFIG_OPTION = typer.Option(
 
 VERBOSE_OPTION =  typer.Option(False, "-v", help="verbose")
 YES_OPTION = typer.Option(False, "-y", help="skip confirmation prompts")
+
+
+@app.command()
+def version():
+		"""
+		Display version
+		"""
+		print(f'Version: {nsync.__version__}')
 
 
 @app.command()

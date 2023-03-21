@@ -1,0 +1,9 @@
+version: "3.9"
+
+services:
+    test:
+        network_mode: host
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: /bin/bash
