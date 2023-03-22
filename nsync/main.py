@@ -76,15 +76,26 @@ def init(
 		if not config_file.parent.exists():
 			config_file.parent.mkdir(parents=True)
 
-		config = {
-			'repo': str(repo),
-			'translations': {
-				'_home': os.environ['HOME'],
-				'_root': '/',
+		if config_file.exists():
+			with config_file.open('r') as fh:
+				config = json.load(fh)
+
+		else:
+			config = {
+				'repo': str(repo),
+				'translations': {
+					'_home': os.environ['HOME'],
+					'_root': '/',
+				}
 			}
-		}
-		with open(config_file, 'w') as fh:
-			json.dump(config, fh, indent=2)
+			with config_file.open('w') as fh:
+				json.dump(config, fh, indent=2)
+
+		attr_file = repo / '.gitattributes'
+		if not attr_file.exists()
+			with attr_file.open('w') as fh:
+				for d, path in config['translations'].items():
+					fh.write(f'{d}/** filter=git-crypt diff=git-crypt\n')
 
 
 def load_config(config_file):
