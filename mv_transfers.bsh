@@ -1,0 +1,20 @@
+#!/bin/bash
+
+echo "Moving files from $1";
+
+mv "$1/.dotfiles.key" ~
+mkdir ~/.ssh
+mv "$1/id_rsa" ~/.ssh/
+mv "$1/id_rsa.pub" ~/.ssh/
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/id_rsa ~/.ssh/id_rsa.pub
+rm -rf $1
+
+cd ~
+git clone $2
+
+cd ~/dotfiles
+git-crypt unlock ~/.dotfiles.key
+
+sudo mkdir /opt/narf
+sudo chown nsync:nsync /opt/narf

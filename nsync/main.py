@@ -425,10 +425,11 @@ def apply_permissions(data, base, repo_path, verbose):
 	for p, stats in data.items():
 		path = base / p
 		relpath = str(path).replace(repo_path, '')
-		vprint(f"Setting {relpath} {oct(stats['mode'])}", verbose, rich=False)
-		path.chmod(stats['mode'])
-		if 'contents' in stats:
-			apply_permissions(stats['contents'], path, repo_path, verbose)
+		if path.exists():
+			vprint(f"Setting {relpath} {oct(stats['mode'])}", verbose, rich=False)
+			path.chmod(stats['mode'])
+			if 'contents' in stats:
+				apply_permissions(stats['contents'], path, repo_path, verbose)
 
 
 @app.command()
@@ -481,7 +482,7 @@ def start_transfer(
 		files = [key_file] + file
 		message = "Transfer files?\n" + "\n".join(str(f) for f in files) + "\n"
 		confirm_apply(yes, message, client.transfer_files, encryption_password, *files)
-		print(f'Storage Key: {client.last_data["key"]}')
+		rprint(f'[bold]Storage Key:[/bold] [green]{client.last_data["key"]}[/green]')
 		print(f'Expiration: {client.last_data["expiration"]}')
 
 @app.command()

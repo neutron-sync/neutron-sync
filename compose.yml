@@ -7,3 +7,5 @@ services:
             context: .
             dockerfile: Dockerfile
         command: /bin/bash
+        volumes:
+            - .:/opt/neutron-sync
