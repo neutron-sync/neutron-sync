@@ -335,6 +335,7 @@ def save(
 	repo, repo_trans, local_trans = load_config(config_file)
 	now = datetime.datetime.now(tz=datetime.timezone.utc)
 	message = f"nsync save @ {now.isoformat()}"
+	git_command(repo, "add", ".", verbose=verbose)
 	git_command(repo, "commit", "-a", "-m", message, verbose=verbose)
 	git_command(repo, "push", verbose=verbose)
 
