@@ -90,3 +90,11 @@ cd {repo-name}
 nsync init `pwd`
 nsync pull
 ```
+
+## Transfer Server
+
+The transfer server can be used to help assist in setting up a new machine. After initial setup, all transactions are stored in your git repository. All files stored on the transfer server are encrypted on device before being sent and only stored temporarily.
+
+File transfers default to using https://www.neutronsync.com/. You can host your own server by running:
+
+`nsync server`
