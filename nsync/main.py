@@ -104,6 +104,8 @@ def init(
 
 			print('Wrote new attributes:', attr_file)
 
+		rprint('[bold]Sponsor this project: https://github.com/sponsors/neutron-sync[/bold]')
+
 
 def load_config(config_file):
 	with open(config_file, 'r') as fh:

@@ -10,6 +10,10 @@ A command line utility to sync your personal dotfiles to an encrypted Github. Th
 
 *[See pipx](https://pypa.github.io/pipx/)*
 
+## Additional Doc
+
+[How Neutron Sync Works](docs/how-it-works.md)
+
 ## Primary Setup
 
 ### Requirements
