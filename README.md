@@ -58,11 +58,17 @@ nsync link ~/.tmux.conf
 
 While files are synced via the git repository, you need to transfer keys to the secondary machine so you can decrypt the repository. By default, it will transfer you encryption key and ssh key.
 
-**On Primary:** `nsync start-transfer`
+**On Primary:**
+
+```bash
+nsync start-transfer
+# follow prompts
+```
 
 **On Secondary:**
 ```
 nsync complete-transfer
+# follow prompts
 mv {output-dir}/.dotfiles.key ~
 mkdir .ssh
 chmod 700 .ssh
