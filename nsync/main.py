@@ -77,6 +77,7 @@ def init(
 			config_file.parent.mkdir(parents=True)
 
 		if config_file.exists():
+			print('Using existing config:', config_file)
 			with config_file.open('r') as fh:
 				config = json.load(fh)
 
@@ -91,11 +92,15 @@ def init(
 			with config_file.open('w') as fh:
 				json.dump(config, fh, indent=2)
 
+			print('Created new config:', config_file)
+
 		attr_file = repo / '.gitattributes'
 		if not attr_file.exists()
 			with attr_file.open('w') as fh:
 				for d, path in config['translations'].items():
 					fh.write(f'{d}/** filter=git-crypt diff=git-crypt\n')
+
+			print('Wrote new attributes:', attr_file)
 
 
 def load_config(config_file):
