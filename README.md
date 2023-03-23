@@ -54,7 +54,7 @@ nsync link ~/.tmux.conf
 
 ## Setup on Another Machine
 
-## Transfer Keys to Secondary
+### Transfer Keys to Secondary
 
 While files are synced via the git repository, you need to transfer keys to the secondary machine so you can decrypt the repository. By default, it will transfer you encryption key and ssh key.
 
