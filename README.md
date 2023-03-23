@@ -66,7 +66,7 @@ nsync start-transfer
 ```
 
 **On Secondary:**
-```
+```bash
 nsync complete-transfer
 # follow prompts
 mv {output-dir}/.dotfiles.key ~
