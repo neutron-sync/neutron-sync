@@ -20,3 +20,5 @@ When you pull files on another machine Neutron Sync automates the following:
 1. Pull git changes.
 1. Recreate links if needed.
 1. Apply file permissions.
+
+![nsync flow](nsync-flow.drawio.png)
