@@ -81,6 +81,8 @@ def init(
 			with config_file.open('r') as fh:
 				config = json.load(fh)
 
+			config['repo'] = str(repo)
+
 		else:
 			config = {
 				'repo': str(repo),
@@ -89,13 +91,13 @@ def init(
 					'_root': '/',
 				}
 			}
-			with config_file.open('w') as fh:
-				json.dump(config, fh, indent=2)
+			print('Creating config:', config_file)
 
-			print('Created new config:', config_file)
+		with config_file.open('w') as fh:
+			json.dump(config, fh, indent=2)
 
 		attr_file = repo / '.gitattributes'
-		if not attr_file.exists()
+		if not attr_file.exists():
 			with attr_file.open('w') as fh:
 				for d, path in config['translations'].items():
 					fh.write(f'{d}/** filter=git-crypt diff=git-crypt\n')
