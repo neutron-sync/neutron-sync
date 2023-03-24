@@ -11,10 +11,13 @@ chmod 600 ~/.ssh/id_rsa ~/.ssh/id_rsa.pub
 rm -rf $1
 
 cd ~
-git clone $2
+git clone git@github.com:pizzapanther/dotfiles-test.git
 
-cd ~/dotfiles
+cd ~/dotfiles-test
 git-crypt unlock ~/.dotfiles.key
 
 sudo mkdir /opt/narf
 sudo chown nsync:nsync /opt/narf
+
+git config --global user.name "Paul Bailey"
+git config --global user.email paul@neutron.studio

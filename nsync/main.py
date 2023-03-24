@@ -64,7 +64,8 @@ def init(
 			readable=False,
 			resolve_path=True,
 			envvar="NSYNC_CONFIG",
-		)
+		),
+		verbose: bool = VERBOSE_OPTION,
 	):
 		"""
 		Create an nsync configuration file
@@ -103,6 +104,8 @@ def init(
 					fh.write(f'{d}/** filter=git-crypt diff=git-crypt\n')
 
 			print('Wrote new attributes:', attr_file)
+			git_command(repo, "add", str(attr_file), verbose=verbose)
+			git_command(repo, "commit", "-m", "initial .gitattributes", str(attr_file), verbose=verbose)
 
 		rprint('[bold]Sponsor this project: https://github.com/sponsors/neutron-sync[/bold]')
 
@@ -298,6 +301,7 @@ def link(
 	git_command(repo, "commit", "-m", message, str(link_data_file(repo, rel=True)), verbose=verbose)
 
 	save_permissions(repo)
+	git_command(repo, "add", str(perms_data_file(repo, rel=True)), verbose=verbose)
 	message = f"nsync perms updated @ {now.isoformat()}"
 	git_command(repo, "commit", "-m", message, str(perms_data_file(repo, rel=True)), verbose=verbose)
 

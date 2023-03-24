@@ -7,7 +7,7 @@ ARG groupid
 
 WORKDIR /opt/neutron-sync
 
-RUN install_packages git-crypt sudo openssh-client
+RUN install_packages git-crypt sudo openssh-client nano
 RUN pip3 install --upgrade pip && pip3 install --upgrade pdm
 
 # User setup

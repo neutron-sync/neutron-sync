@@ -30,9 +30,10 @@ A command line utility to sync your personal dotfiles to an encrypted Github. Th
 git clone git@github.com:{github-user}/{repo-name}.git
 cd {repo-name}
 git-crypt init
-nsync init `pwd` **generate attrs here
+nsync init `pwd`
 git-crypt export-key ~/.dotfiles.key
 git-crypt unlock ~/.dotfiles.key
+# you may get an error if you have no files initially which is OK
 ```
 
 ### Add files

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# sudo /opt/bitnami/python/bin/pip3 install dist/neutron_sync-0.X.X-py3-none-any.whl
+
+ssh-keygen
+cat ~/.ssh/id_rsa.pub
+echo "Enter key into your Github"
+read -p "Press enter to continue"
+
+cd ~
+git clone git@github.com:pizzapanther/dotfiles-test.git
+cd dotfiles-test/
+git config --global user.name "Paul Bailey"
+git config --global user.email paul@neutron.studio
+git-crypt init
+nsync init `pwd`
+git-crypt export-key ~/.dotfiles.key
+git-crypt unlock ~/.dotfiles.key

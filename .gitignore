@@ -131,3 +131,4 @@ dmypy.json
 .pdm.toml
 ntransfer-*
 .bash_history
+narf.txt
