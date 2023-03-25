@@ -11,10 +11,27 @@ import httpx
 
 
 class ApiClient:
+  """An API client for transferring files securely."""
   def __init__(self, server_url):
+    """
+    Initializes a new instance of the ApiClient class.
+
+    Args:
+      server_url (str): The URL of the server that the client will communicate with.
+    """
     self.server_url = server_url
 
-  def transfer_files(self, password, *files):
+  def transfer_files(self, password, *files): 
+    """
+    Transfers files securely to the server.
+
+    Args:
+      password (str): The password to use for encrypting the files.
+      files: The files to transfer to the server.
+
+    Returns:
+      The response from the server.
+    """
     salt = os.urandom(16)
     salty = base64.urlsafe_b64encode(salt).decode()
     kdf = PBKDF2HMAC(
@@ -48,6 +65,16 @@ class ApiClient:
     return rdata
 
   def download(self, password, storage_key):
+    """
+    Downloads files securely from the server.
+
+    Args:
+      password (str): The password to use for decrypting the files.
+      storage_key (str): The key to use for retrieving the files from the server.
+
+    Returns:
+      The response from the server.
+    """    
     response = httpx.post(self.server_url, data={'action': 'get', 'key': storage_key})
     try:
       rdata = response.json()
