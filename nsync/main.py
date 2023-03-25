@@ -39,7 +39,7 @@ YES_OPTION = typer.Option(False, "-y", help="skip confirmation prompts")
 @app.command()
 def version():
 		"""
-		Display version
+		Display version of the program.
 		"""
 		print(f'Version: {nsync.__version__}')
 
@@ -68,8 +68,18 @@ def init(
 		verbose: bool = VERBOSE_OPTION,
 	):
 		"""
-		Create an nsync configuration file
+		Create a configuration file for nsync.
+
+		Parameters:
+		----------
+		repo : Path
+			Path to the repository.
+		config_file : Path
+			Path to the configuration file.
+		verbose : bool
+			Whether or not to run the command in verbose mode.
 		"""
+
 		if repo is None:
 			print('repo argument is required')
 			sys.exit(1)
@@ -111,6 +121,19 @@ def init(
 
 
 def load_config(config_file):
+	"""
+	Load configuration file.
+
+	Parameters:
+	----------
+	config_file : Path
+		Path to the configuration file.
+	
+	Returns:
+	-------
+	tuple
+		A tuple containing the repository, translations and local translations.
+	"""
 	with open(config_file, 'r') as fh:
 		data = json.load(fh)
 		local_trans = {}
@@ -121,6 +144,17 @@ def load_config(config_file):
 
 
 def translate_to_repo(repo, local_trans, path):
+	"""
+	Translate local file path to remote path in the repo.
+
+	Args:
+		repo (str): Remote repo path.
+		local_trans (dict): Dictionary containing local path and its translations to remote.
+		path (Path): Local path to file.
+
+	Returns:
+		Tuple containing remote path and its translation.
+	"""
 	for base, trans in local_trans.items():
 		if str(path).startswith(base):
 			trans_full = repo + os.path.sep + trans
@@ -137,6 +171,16 @@ def translate_to_repo(repo, local_trans, path):
 
 
 def translate_to_fs(repo_rel, repo_trans):
+	"""
+	Translate remote file path to local file path.
+
+	Args:
+		repo_rel (str): Remote path to file.
+		repo_trans (dict): Dictionary containing remote path and its translations to local.
+
+	Returns:
+		Local path to the file.
+	"""
 	for base, trans in repo_trans.items():
 		if repo_rel.startswith(base):
 			new_path = repo_rel.replace(base + os.path.sep, "", 1)
@@ -144,6 +188,14 @@ def translate_to_fs(repo_rel, repo_trans):
 
 
 def vprint(message, verbose, rich=True):
+	"""
+	Print a message to the console based on whether verbose mode is enabled.
+
+	Args:
+		message (str): The message to print.
+		verbose (bool): Whether verbose mode is enabled.
+		rich (bool, optional): Whether to use rich print. Defaults to True.
+	"""
 	if verbose:
 		if rich:
 			rprint(message)
@@ -152,6 +204,18 @@ def vprint(message, verbose, rich=True):
 
 
 def confirm_apply(yes, question, func, *args, **kwargs):
+	"""Confirm with user before applying a function.
+
+	Args:
+		yes (bool): If True, automatically apply the function.
+		question (str): The confirmation question to ask the user.
+		func (callable): The function to apply if confirmed.
+		*args: Any positional arguments for the function.
+		**kwargs: Any keyword arguments for the function.
+
+	Returns:
+		bool: Whether the function was applied or not.
+	"""
 	do_apply = False
 	if yes:
 		do_apply = True
@@ -167,6 +231,15 @@ def confirm_apply(yes, question, func, *args, **kwargs):
 
 
 def git_command(repo, command, *args, verbose=False):
+	"""
+	Execute a Git command.
+
+	Args:
+		repo (str): The path to the Git repository.
+		command (str): The Git command to execute.
+		*args: Any positional arguments for the command.
+		verbose (bool, optional): Whether verbose mode is enabled. Defaults to False.
+	"""
 	repo = Repo(repo)
 	message = f"[green]Command: git {command}"
 	if args:
@@ -181,6 +254,17 @@ def git_command(repo, command, *args, verbose=False):
 
 
 def link_data_file(repo, rel=False):
+	"""
+	Returns the path to the 'nsync-links.json' file.
+
+	Args:
+	repo (str): The path of the repository.
+	rel (bool): If True, return the filename only. If False, return the full path.
+
+	Returns:
+	Path: The path to the 'nsync-links.json' file.
+	"""
+
 	filename = 'nsync-links.json'
 
 	if rel:
@@ -190,6 +274,16 @@ def link_data_file(repo, rel=False):
 
 
 def perms_data_file(repo, rel=False):
+	"""
+	Returns the path to the 'nsync-perms.json' file.
+
+	Args:
+	repo (str): The path of the repository.
+	rel (bool): If True, return the filename only. If False, return the full path.
+
+	Returns:
+	Path: The path to the 'nsync-perms.json' file.
+	"""
 	filename = 'nsync-perms.json'
 
 	if rel:
@@ -199,6 +293,13 @@ def perms_data_file(repo, rel=False):
 
 
 def update_links(repo, to_path):
+	"""
+	Updates the 'nsync-links.json' file by appending the relative path of the added file to it.
+
+	Args:
+	repo (str): The path of the repository.
+	to_path (str): The path of the file that was added to the repository.
+	"""
 	lf = link_data_file(repo)
 	repo = Path(repo)
 
@@ -214,6 +315,12 @@ def update_links(repo, to_path):
 
 
 def remove_path(path):
+	"""
+	Removes the specified path, either a file or directory.
+
+	Args:
+	path (Path): The path to be removed.
+	"""
 	if path.is_dir():
 		shutil.rmtree(path)
 
@@ -222,6 +329,15 @@ def remove_path(path):
 
 
 def relink(repo, repo_trans, verbose=False, yes=False):
+	"""
+	Relinks all the files in the 'nsync-links.json' file.
+
+	Args:
+	repo (str): The path of the repository.
+	repo_trans (dict): A dictionary that maps the paths of the local files to their encrypted counterparts.
+	verbose (bool): If True, print detailed output. If False, print only important output.
+	yes (bool): If True, don't ask for confirmation before removing a symlink. If False, ask for confirmation.
+	"""
 	with open(link_data_file(repo), 'r') as fh:
 		links = json.load(fh)
 		for link in links:
@@ -276,6 +392,12 @@ def link(
 	):
 	"""
 	Move a file to encrypted repo and link, commit, and push(optional)
+
+	Args:
+	    paths (List[Path], optional): List of paths to move to encrypted repo and link. Defaults to None.
+	    config_file (Path, optional): Path to the config file. Defaults to CONFIG_OPTION.
+	    verbose (bool, optional): If True, show verbose output. Defaults to VERBOSE_OPTION.
+	    yes (bool, optional): If True, answer "yes" to all prompts. Defaults to YES_OPTION.
 	"""
 
 	repo, repo_trans, local_trans = load_config(config_file)
@@ -316,6 +438,11 @@ def pull(
 	):
 	"""
 	Pull files from remote and re-link
+
+	Args:
+	    config_file (Path, optional): Path to the config file. Defaults to CONFIG_OPTION.
+	    verbose (bool, optional): If True, show verbose output. Defaults to VERBOSE_OPTION.
+	    yes (bool, optional): If True, answer "yes" to all prompts. Defaults to YES_OPTION.
 	"""
 
 	repo, repo_trans, local_trans = load_config(config_file)
@@ -330,6 +457,9 @@ def push(
 	):
 	"""
 	Push files to remote
+
+	Args:
+	    config_file (Path, optional): Path to the config file. Defaults to CONFIG_OPTION.
 	"""
 
 	repo, repo_trans, local_trans = load_config(config_file)
@@ -342,7 +472,15 @@ def status(
 		verbose: bool = VERBOSE_OPTION,
 	):
 	"""
-	Get repo status
+	Get the status of the repository.
+
+	Parameters:
+	-----------
+	config_file : Path, optional
+		The path of the configuration file to load.
+	verbose : bool, optional
+		Whether to print verbose output.
+
 	"""
 	repo, repo_trans, local_trans = load_config(config_file)
 	git_command(repo, "status", verbose=True)
@@ -354,7 +492,15 @@ def save(
 		verbose: bool = VERBOSE_OPTION,
 	):
 	"""
-	Commit existing tracked files and push to remote
+	Commit existing tracked files and push to remote.
+
+	Parameters:
+	-----------
+	config_file : Path, optional
+		The path of the configuration file to load.
+	verbose : bool, optional
+		Whether to print verbose output.
+
 	"""
 	repo, repo_trans, local_trans = load_config(config_file)
 	now = datetime.datetime.now(tz=datetime.timezone.utc)
@@ -381,7 +527,18 @@ def remove(
 		yes: bool = YES_OPTION,
 	):
 	"""
-	Remove a file locally and in the repo
+	Remove a file locally and in the repo.
+
+	Parameters:
+	-----------
+	paths : List[Path], optional
+		A list of paths of files or directories to remove.
+	config_file : Path, optional
+		The path of the configuration file to load.
+	verbose : bool, optional
+		Whether to print verbose output.
+	yes : bool, optional
+		Whether to proceed with removal without prompting the user.
 	"""
 	repo, repo_trans, local_trans = load_config(config_file)
 	now = datetime.datetime.now(tz=datetime.timezone.utc)
@@ -416,12 +573,32 @@ def restore_local_only(
 	):
 	"""
 	Remove file from repo and put back to the local location
+
+	Args:
+	- paths (List[Path]): Paths to the files to restore. If None, all files will be restored.
+	- config_file (Path): Path to the config file.
+	- verbose (bool): If True, display more detailed output.
+	- yes (bool): If True, automatically answer "yes" to any prompts.
+
+	Returns:
+	- None
 	"""
 	repo, repo_trans, local_trans = load_config(config_file)
 	now = datetime.datetime.now(tz=datetime.timezone.utc)
 
 
 def get_permissions(data, base, link):
+	 """
+	Recursive function to get file permissions.
+
+	Args:
+	- data (dict): A dictionary of file permissions.
+	- base (Path): The base directory.
+	- link (str): The path of the file relative to the base directory.
+
+	Returns:
+	- None
+	"""
 	src_path = base / link
 
 	data[link] = {'mode': src_path.stat().st_mode}
@@ -433,9 +610,14 @@ def get_permissions(data, base, link):
 
 def save_permissions(repo):
 	"""
-	Get file permissions and save in data file
-	"""
+	Save file permissions in data file.
 
+	Args:
+	- repo (str): Path to the repository.
+
+	Returns:
+	- None
+	"""
 	with open(link_data_file(repo), 'r') as fh:
 		links = json.load(fh)
 
@@ -448,6 +630,18 @@ def save_permissions(repo):
 
 
 def apply_permissions(data, base, repo_path, verbose):
+	"""
+	Recursive function to apply file permissions.
+
+	Args:
+	- data (dict): A dictionary of file permissions.
+	- base (Path): The base directory.
+	- repo_path (str): The path of the repository.
+	- verbose (bool): If True, display more detailed output.
+
+	Returns:
+	- None
+	"""
 	for p, stats in data.items():
 		path = base / p
 		relpath = str(path).replace(repo_path, '')
@@ -464,7 +658,14 @@ def apply_perms(
 		verbose: bool = VERBOSE_OPTION,
 	):
 		"""
-		reapply file permissions from remote
+		Reapply file permissions from remote.
+
+		Args:
+		- config_file (Path): Path to the config file.
+		- verbose (bool): If True, display more detailed output.
+
+		Returns:
+		- None
 		"""
 		repo, repo_trans, local_trans = load_config(config_file)
 
@@ -502,7 +703,17 @@ def start_transfer(
 		yes: bool = YES_OPTION,
 	):
 		"""
-		Transfer small text files to another machine
+		Transfer small text files to another machine.
+
+		Args:
+		key_file (Path): The path to the key file to be transferred.
+		file (List[Path]): A list of file paths to be transferred.
+		server_url (str): The URL of the transfer server.
+		encryption_password (str): The encryption password for the transfer.
+		yes (bool): Whether to skip confirmation prompts.
+
+		Returns:
+		None
 		"""
 		client = ApiClient(server_url)
 		files = [key_file] + file
@@ -518,7 +729,15 @@ def complete_transfer(
 		storage_key: str = typer.Option(None, prompt=True),
 	):
 		"""
-		Complete a transfer of files on another machine
+		Complete a transfer of files on another machine.
+
+		Args:
+		server_url (str): The URL of the transfer server.
+		encryption_password (str): The encryption password for the transfer.
+		storage_key (str): The storage key for the transfer.
+
+		Returns:
+		None
 		"""
 		client = ApiClient(server_url)
 		client.download(encryption_password, storage_key)
@@ -530,7 +749,14 @@ def server(
 		port: int = typer.Argument(8000, envvar="PORT")
 	):
 		"""
-		Run a transfer server
+		Run a transfer server.
+
+		Args:
+		host (str): The host IP for the server.
+		port (int): The port number for the server.
+
+		Returns:
+		None
 		"""
 		config = uvicorn.Config('nsync.server:app', host=host, port=port, log_level="info", reload=True)
 		server = uvicorn.Server(config)
