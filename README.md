@@ -88,6 +88,7 @@ mv {output-dir}/id_rsa.pub ~/.ssh
 ```
 git clone git@github.com:{github-user}/{repo-name}.git
 cd {repo-name}
+git-crypt unlock ~/.dotfiles.key
 nsync init `pwd`
 nsync pull
 ```
