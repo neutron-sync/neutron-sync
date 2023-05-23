@@ -81,6 +81,7 @@ mkdir .ssh
 chmod 700 .ssh
 mv {output-dir}/id_rsa ~/.ssh
 mv {output-dir}/id_rsa.pub ~/.ssh
+chmod 600 ~/.ssh/*
 ```
 
 ### Setup - Secondary
