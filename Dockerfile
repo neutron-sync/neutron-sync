@@ -14,8 +14,7 @@ WORKDIR /app
 RUN pipx ensurepath
 ENV PATH="${PATH}:/home/web/.local/bin"
 ENV PYTHONUNBUFFERED=1
-RUN pipx install pdm
-RUN pipx install honcho
+RUN pipx install pdm && pipx install honcho
 RUN pdm install
 
 CMD honcho start
