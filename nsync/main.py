@@ -588,7 +588,7 @@ def restore_local_only(
 
 
 def get_permissions(data, base, link):
-	 """
+	"""
 	Recursive function to get file permissions.
 
 	Args:
