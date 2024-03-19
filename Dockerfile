@@ -1,6 +1,6 @@
 FROM docker.io/bitnami/minideb:bookworm
 
-RUN install_packages bash python3 pipx
+RUN install_packages bash python3 pipx git-crypt redis-server
 
 RUN groupadd -r web && useradd -ms /bin/bash -g web web
 RUN mkdir -p /app
@@ -13,7 +13,9 @@ WORKDIR /app
 
 RUN pipx ensurepath
 ENV PATH="${PATH}:/home/web/.local/bin"
+ENV PYTHONUNBUFFERED=1
 RUN pipx install pdm
+RUN pipx install honcho
 RUN pdm install
 
-CMD pdm run python3 nsync/main.py server 0.0.0.0 8000
+CMD honcho start

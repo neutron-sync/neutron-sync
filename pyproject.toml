@@ -38,3 +38,4 @@ version = {from = "nsync/__init__.py"}
 _.env_file = ".env"
 ndev = "pdm run python nsync/main.py"
 publish = "pdm publish --username __token__ --password $PDM_PUBLISH_PASSWORD_NSYNC"
+deploy = "./deploy.bsh"
